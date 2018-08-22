@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		4CA2762E212DAE67009F9332 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA2762D212DAE67009F9332 /* main.m */; };
+		4CA27636212DAF53009F9332 /* TYPerson.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA27635212DAF53009F9332 /* TYPerson.m */; };
+		4CA27639212DAF69009F9332 /* TYPerson+category_First.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA27638212DAF69009F9332 /* TYPerson+category_First.m */; };
+		4CA2763C212DAF83009F9332 /* TYPerson+category_Second.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA2763B212DAF83009F9332 /* TYPerson+category_Second.m */; };
+		4CA2763F212DAF90009F9332 /* TYStudent.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA2763E212DAF90009F9332 /* TYStudent.m */; };
+		4CA27642212DAFAB009F9332 /* TYStudent+category_First.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA27641212DAFAB009F9332 /* TYStudent+category_First.m */; };
+		4CA27645212DAFB8009F9332 /* TYStudent+category_Second.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA27644212DAFB8009F9332 /* TYStudent+category_Second.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +31,18 @@
 /* Begin PBXFileReference section */
 		4CA2762A212DAE67009F9332 /* load */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = load; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CA2762D212DAE67009F9332 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		4CA27634212DAF53009F9332 /* TYPerson.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TYPerson.h; sourceTree = "<group>"; };
+		4CA27635212DAF53009F9332 /* TYPerson.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TYPerson.m; sourceTree = "<group>"; };
+		4CA27637212DAF69009F9332 /* TYPerson+category_First.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TYPerson+category_First.h"; sourceTree = "<group>"; };
+		4CA27638212DAF69009F9332 /* TYPerson+category_First.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "TYPerson+category_First.m"; sourceTree = "<group>"; };
+		4CA2763A212DAF83009F9332 /* TYPerson+category_Second.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TYPerson+category_Second.h"; sourceTree = "<group>"; };
+		4CA2763B212DAF83009F9332 /* TYPerson+category_Second.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "TYPerson+category_Second.m"; sourceTree = "<group>"; };
+		4CA2763D212DAF90009F9332 /* TYStudent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TYStudent.h; sourceTree = "<group>"; };
+		4CA2763E212DAF90009F9332 /* TYStudent.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TYStudent.m; sourceTree = "<group>"; };
+		4CA27640212DAFAB009F9332 /* TYStudent+category_First.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TYStudent+category_First.h"; sourceTree = "<group>"; };
+		4CA27641212DAFAB009F9332 /* TYStudent+category_First.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "TYStudent+category_First.m"; sourceTree = "<group>"; };
+		4CA27643212DAFB8009F9332 /* TYStudent+category_Second.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TYStudent+category_Second.h"; sourceTree = "<group>"; };
+		4CA27644212DAFB8009F9332 /* TYStudent+category_Second.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "TYStudent+category_Second.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +76,18 @@
 			isa = PBXGroup;
 			children = (
 				4CA2762D212DAE67009F9332 /* main.m */,
+				4CA27634212DAF53009F9332 /* TYPerson.h */,
+				4CA27635212DAF53009F9332 /* TYPerson.m */,
+				4CA27637212DAF69009F9332 /* TYPerson+category_First.h */,
+				4CA27638212DAF69009F9332 /* TYPerson+category_First.m */,
+				4CA2763A212DAF83009F9332 /* TYPerson+category_Second.h */,
+				4CA2763B212DAF83009F9332 /* TYPerson+category_Second.m */,
+				4CA2763D212DAF90009F9332 /* TYStudent.h */,
+				4CA2763E212DAF90009F9332 /* TYStudent.m */,
+				4CA27640212DAFAB009F9332 /* TYStudent+category_First.h */,
+				4CA27641212DAFAB009F9332 /* TYStudent+category_First.m */,
+				4CA27643212DAFB8009F9332 /* TYStudent+category_Second.h */,
+				4CA27644212DAFB8009F9332 /* TYStudent+category_Second.m */,
 			);
 			path = load;
 			sourceTree = "<group>";
@@ -118,7 +148,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CA27636212DAF53009F9332 /* TYPerson.m in Sources */,
+				4CA2763F212DAF90009F9332 /* TYStudent.m in Sources */,
+				4CA2763C212DAF83009F9332 /* TYPerson+category_Second.m in Sources */,
+				4CA27645212DAFB8009F9332 /* TYStudent+category_Second.m in Sources */,
+				4CA27642212DAFAB009F9332 /* TYStudent+category_First.m in Sources */,
 				4CA2762E212DAE67009F9332 /* main.m in Sources */,
+				4CA27639212DAF69009F9332 /* TYPerson+category_First.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

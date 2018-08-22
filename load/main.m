@@ -7,11 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "TYPerson.h"
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        // insert code here...
-        NSLog(@"Hello, World!");
+       
+        [TYPerson test];
+        
     }
     return 0;
 }
