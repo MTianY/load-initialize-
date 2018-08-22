@@ -58,15 +58,15 @@
     
 - 调用 `[ TYPerson test]`方法.那么打印如下:
 
-    ```c
-    +[TYPerson load]
- +[TYPerson(category_Second) load]
- +[TYPerson(category_First) load]
- +[TYPerson(category_First) test]
-    ```
-    
-    - 我们知道,类及其它的分类,如果有相同方法的实现,那么会优先调用分类的方法(后编译的分类的方法会优先调用).
-    - 那么为什么`load`方法不同?为什么不是同`test`方法类似,`只调用分类里面的 load 方法呢?`
+```lldb
++[TYPerson load]
++[TYPerson(category_Second) load]
++[TYPerson(category_First) load]
++[TYPerson(category_First) test]
+```
+
+- 我们知道,类及其它的分类,如果有相同方法的实现,那么会优先调用分类的方法(后编译的分类的方法会优先调用).
+- 那么为什么`load`方法不同?为什么不是同`test`方法类似,`只调用分类里面的 load 方法呢?`
 
 ### 1. load 方法的底层实现
 
