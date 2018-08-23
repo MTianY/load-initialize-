@@ -281,9 +281,9 @@ more_categories = call_category_loads();
 
     ```c++
     struct loadable_category {
-    Category cat;  // may be nil
-    IMP method;
-};
+        Category cat;  // may be nil
+        IMP method;
+    };
     ```
     
     - 然后循环变量,取出每个`分类和方法`
