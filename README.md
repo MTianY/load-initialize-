@@ -400,3 +400,256 @@ static bool call_category_loads(void)
 - 所以二者不同.
 
 
+## 三.类之间有继承的时候, load 方法
+
+现有一个类`TYStudent`继承自`TYPerson`.然后有两个`TYStudent`类的分类:`TYStudent+category_First`和`TYStudent+category_Second`.每个类及分类中都有`+(void)load`方法的实现.运行程序,打印如下:
+
+```c
++[TYPerson load]
++[TYStudent load]
++[TYPerson(category_Second) load]
++[TYStudent(category_Second) load]
++[TYStudent(category_First) load]
++[TYPerson(category_First) load]
+```
+
+- 每个类及其分类的`load`方法都会被调用.
+
+### 1.`load`方法的调用顺序?
+
+通过方法`call_load_methods`方法可以得知:
+
+- 会先反复调用`class`的`load`方法,直到所有 load 方法都调用完毕.
+- 然后调用一次分类的 load 方法
+
+```c++
+void call_load_methods(void)
+{
+    static bool loading = NO;
+    bool more_categories;
+
+    loadMethodLock.assertLocked();
+
+    // Re-entrant calls do nothing; the outermost call will finish the job.
+    if (loading) return;
+    loading = YES;
+
+    void *pool = objc_autoreleasePoolPush();
+
+    do {
+        // 1. Repeatedly call class +loads until there aren't any more
+        while (loadable_classes_used > 0) {
+            call_class_loads();
+        }
+
+        // 2. Call category +loads ONCE
+        more_categories = call_category_loads();
+
+        // 3. Run more +loads if there are classes OR more untried categories
+    } while (loadable_classes_used > 0  ||  more_categories);
+
+    objc_autoreleasePoolPop(pool);
+
+    loading = NO;
+}
+```
+
+### 2.`class`中 `load 方法`的调用顺序?
+
+**结论**
+
+- `有继承关系的类`: 先调用父类的 load 方法,再调用子类的 load 方法.
+- `无继承关系的类`: 优先调用`先被编译`的类的 load 方法
+
+
+**证明**
+
+看上面`call_load_methods`方法.调用`class`中`load`方法那段.
+
+```c++
+do {
+        // 1. Repeatedly call class +loads until there aren't any more
+       while (loadable_classes_used > 0) {
+           call_class_loads();
+       }
+    
+       // 2. Call category +loads ONCE
+       more_categories = call_category_loads();
+    
+       // 3. Run more +loads if there are classes OR more untried categories
+    } while (loadable_classes_used > 0  ||  more_categories);
+```
+
+看`call_class_loads`方法的实现.
+
+```c++
+static void call_class_loads(void)
+{
+    int i;
+    
+    // Detach current loadable list.
+    struct loadable_class *classes = loadable_classes;
+    int used = loadable_classes_used;
+    loadable_classes = nil;
+    loadable_classes_allocated = 0;
+    loadable_classes_used = 0;
+    
+    // Call all +loads for the detached list.
+    // 这里是循环遍历取出 classes 这个数组中的 class, 然后拿到它的方法(load)进行调用.
+    for (i = 0; i < used; i++) {
+        Class cls = classes[i].cls;
+        load_method_t load_method = (load_method_t)classes[i].method;
+        if (!cls) continue; 
+
+        if (PrintLoading) {
+            _objc_inform("LOAD: +[%s load]\n", cls->nameForLogging());
+        }
+        (*load_method)(cls, SEL_load);
+    }
+    
+    // Destroy the detached list.
+    if (classes) free(classes);
+}
+```
+
+通过`call_class_loads`这个方法实现,可以看出.它内部是通过`循环遍历取出 classes 这个数组中的 class. 然后按顺序拿到它的方法(即load方法)进行调用`.那么只要知道这个`classes`中类的顺序,就可以知道 class 中 load 方法的调用顺序了.
+
+回到`load_images`方法.看`prepare_load_methods`这个方法.这是发现 load 方法并做准备操作的一步.
+
+```c++
+void
+load_images(const char *path __unused, const struct mach_header *mh)
+{
+    // Return without taking locks if there are no +load methods here.
+    if (!hasLoadMethods((const headerType *)mh)) return;
+
+    recursive_mutex_locker_t lock(loadMethodLock);
+
+    // Discover load methods
+    {
+        rwlock_writer_t lock2(runtimeLock);
+        prepare_load_methods((const headerType *)mh);
+    }
+
+    // Call +load methods (without runtimeLock - re-entrant)
+    call_load_methods();
+}
+```
+
+查看`prepare_load_methods`方法的实现:发现`schedule_class_load`方法.其含义是`prepare_load_methods Schedule +load for classes in this image, any un-+load-ed  superclasses in other images, and any categories in this image`,做一些准备,规划工作为类.
+
+```c++
+void prepare_load_methods(const headerType *mhdr)
+{
+    size_t count, i;
+
+    runtimeLock.assertWriting();
+
+    classref_t *classlist = 
+        _getObjc2NonlazyClassList(mhdr, &count);
+    for (i = 0; i < count; i++) {
+    // prepare_load_methods Schedule +load for classes in this image, any un-+load-ed superclasses in other images, and any categories in this image
+    schedule_class_load(remapClass(classlist[i]));
+    }
+
+    category_t **categorylist = _getObjc2NonlazyCategoryList(mhdr, &count);
+    for (i = 0; i < count; i++) {
+        category_t *cat = categorylist[i];
+        Class cls = remapClass(cat->cls);
+        if (!cls) continue;  // category for ignored weak-linked class
+        realizeClass(cls);
+        assert(cls->ISA()->isRealized());
+        add_category_to_loadable_list(cat);
+    }
+}
+```
+
+继续查看`schedule_class_load`的实现.发现`add_class_to_loadable_list`方法.
+
+```c++
+static void schedule_class_load(Class cls)
+{
+    if (!cls) return;
+    assert(cls->isRealized());  // _read_images should realize
+
+    if (cls->data()->flags & RW_LOADED) return;
+
+    // Ensure superclass-first ordering
+    // 确保先调用父类的 load 方法
+    schedule_class_load(cls->superclass);
+
+    // 将类加到这个数组中,有父类的话先添加父类进去,然后再加子类
+    add_class_to_loadable_list(cls);
+    cls->setInfo(RW_LOADED); 
+}
+```
+
+查看`add_class_to_loadable_list`方法的实现:
+
+```c++
+void add_class_to_loadable_list(Class cls)
+{
+    IMP method;
+
+    loadMethodLock.assertLocked();
+
+    method = cls->getLoadMethod();
+    if (!method) return;  // Don't bother if cls has no +load method
+    
+    if (PrintLoading) {
+        _objc_inform("LOAD: class '%s' scheduled for +load", 
+                     cls->nameForLogging());
+    }
+    
+    if (loadable_classes_used == loadable_classes_allocated) {
+        loadable_classes_allocated = loadable_classes_allocated*2 + 16;
+        loadable_classes = (struct loadable_class *)
+            realloc(loadable_classes,
+                              loadable_classes_allocated *
+                              sizeof(struct loadable_class));
+    }
+    
+    loadable_classes[loadable_classes_used].cls = cls;
+    loadable_classes[loadable_classes_used].method = method;
+    loadable_classes_used++;
+}
+```
+
+**所以类中load 方法的调用顺序是先调用父类的.再调用子类的**
+
+### 3.category 中 load 方法的调用顺序?
+
+**结论**
+
+- category 中的 load 方法不用管继承这种,只管`编译顺序`.`先被编译的先被调用`.
+
+证明方法同 class 类似.
+
+
+### 4.load 方法可不可以继承?
+
+首先,我们一般不会去`主动`调用 `load方法`.但是如果问 load 方法可不可以继承,答案是:`子类确实可以调用父类的 load 方法.`
+
+如有两个类: `TYStudent 继承自 TYPerson`.
+
+- TYPerson 中实现了 load 方法
+- TYStudent 中没有实现 load 方法
+- TYStudent 主动调用 load 方法 `[TYStudent load]`
+- 打印结果如下:
+
+```c
+// 这三个是 TYPerson 及其分类由 runtime 加载时主动调用的 load 方法
++[TYPerson load]
++[TYPerson(category_Second) load]
++[TYPerson(category_First) load]
+------
+
+// 这个是我们手动调用 load 方法的实现
++[TYPerson(category_First) load]
+```
+
+手动调用 load 方法.`[TYStudent load]`.其实质就是`objc_msgSend([TYStudent class], @selector(load))`.
+
+- 那么会首先通过`TYStudent` 的`isa`指针找到`TYStudent的元类对象`,然后去这里找`+(void)load`方法.
+- 因为在`TYStudent`的元类对象中找不到 load 方法.那么就会通过`superclass`指针去找其`父类的元类对象`,即`TYPerson`的元类对象,发现这里确实有load 方法,但是因为`TYPerson`的分类的方法会在方法数组的前面,所以优先调用分类的 load 方法.所以如上的打印结果.
+

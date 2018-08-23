@@ -8,11 +8,16 @@
 
 #import <Foundation/Foundation.h>
 #import "TYPerson.h"
+#import "TYStudent.h"
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
        
-        [TYPerson test];
+//        [TYPerson test];
+        
+        NSLog(@"--------");
+        
+        [TYStudent load];
         
     }
     return 0;

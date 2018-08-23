@@ -10,5 +10,8 @@
 
 @implementation TYStudent
 
+//+ (void)load {
+//    NSLog(@"%s",__func__);
+//}
 
 @end

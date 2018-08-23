@@ -10,6 +10,8 @@
 
 @implementation TYStudent (category_First)
 
-
+//+ (void)load {
+//    NSLog(@"%s",__func__);
+//}
 
 @end
