@@ -184,19 +184,19 @@ void call_load_methods(void)
     
     /*** -------------loadable_class--------------------***/
     // List of classes that need +load called (pending superclass +load)
-// This list always has superclasses first because of the way it is constructed
-static struct loadable_class *loadable_classes = nil;
-static int loadable_classes_used = 0;
-static int loadable_classes_allocated = 0;
+    // This list always has superclasses first because of the way it is constructed
+    static struct loadable_class *loadable_classes = nil;
+    static int loadable_classes_used = 0;
+    static int loadable_classes_allocated = 0;
     ``` 
     
     - `loadable_class` 的结构
 
     ```c++
     struct loadable_class {
-    Class cls;  // may be nil
-    IMP method; // 其实就是 +load 方法
-};
+       Class cls;  // may be nil
+       IMP method; // 其实就是 +load 方法
+    };
     ```
     
     - 对可加载的类循环遍历.取出 cls 和 method,然后通过 cls 调用它的 method(即 +load 方法).
